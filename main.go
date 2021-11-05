@@ -1,8 +1,13 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -13,6 +18,13 @@ type Credentials struct {
 	ConsumerSecret    string
 	AccessToken       string
 	AccessTokenSecret string
+}
+
+type country struct {
+	Name struct {
+		Common string `json:"common"`
+	} `json:"name"`
+	Capital []string `json:"capital"`
 }
 
 func getClient(creds *Credentials) (*twitter.Client, error) {
@@ -48,6 +60,44 @@ func main() {
 	}
 
 	log.Printf("Success!\n")
+
+	url := "https://restcountries.com/v3.1/all"
+
+	countryclient := http.Client{
+		Timeout: time.Second * 2,
+	}
+
+	req, countryerr := http.NewRequest(http.MethodGet, url, nil)
+	if countryerr != nil {
+		log.Fatal(countryerr)
+	}
+
+	req.Header.Set("User-Agent", "spacecount-tutorial")
+
+	res, getErr := countryclient.Do(req)
+	if getErr != nil {
+		log.Fatal(getErr)
+	}
+
+	if res.Body != nil {
+		defer res.Body.Close()
+	}
+
+	body, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		log.Fatal(readErr)
+	}
+
+	fmt.Println(res)
+
+	countries := []country{}
+	jsonErr := json.Unmarshal(body, &countries)
+
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+
+	fmt.Println(countries[0])
 
 	client, err := getClient(&creds)
 	if err != nil {
