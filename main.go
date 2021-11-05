@@ -75,11 +75,25 @@ func main() {
 	log.Printf("Getting Twitter client...\n")
 	client, err := getClient(&creds)
 	if err != nil {
-		log.Println("Error getting Twitter Client")
+		log.Fatal("--- Error getting Twitter Client, shutting down app :( --- ")
 		log.Println(err)
 	}
 
-	countryToTweet := getRandomCountry(countries)
+	isCountryAlreadyTweeted := true
+	countryToTweet := Country{}
+
+	for {
+		countryToTweet = getRandomCountry(countries)
+
+		isCountryAlreadyTweeted = stringInSlice(countryToTweet.Name.Common, countries)
+
+		if !isCountryAlreadyTweeted {
+			break
+		} else {
+			log.Printf("Country already tweeted, getting another one ;)\n")
+		}
+	}
+
 	clearRequestData(res)
 	tweet(client, &countryToTweet)
 
@@ -87,6 +101,15 @@ func main() {
 	fileCountries, _ := readCountriesFromFile()
 
 	log.Printf(fileCountries[1])
+}
+
+func stringInSlice(a string, list []Country) bool {
+	for _, b := range list {
+		if b.Name.Common == a {
+			return false
+		}
+	}
+	return true
 }
 
 func writeCountryNameInFile(err error, countryToTweet Country) {
