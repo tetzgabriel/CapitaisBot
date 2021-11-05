@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -82,6 +83,13 @@ func main() {
 	clearRequestData(res)
 	tweet(client, &countryToTweet)
 
+	writeCountryNameInFile(err, countryToTweet)
+	fileCountries, _ := readCountriesFromFile()
+
+	log.Printf(fileCountries[1])
+}
+
+func writeCountryNameInFile(err error, countryToTweet Country) {
 	f, fileErr := os.OpenFile("data/TweetedCountries.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if fileErr != nil {
 		panic(err)
@@ -89,9 +97,24 @@ func main() {
 
 	defer f.Close()
 
-	if _, err = f.WriteString("|" + countryToTweet.Name.Common); err != nil {
+	if _, err = f.WriteString(countryToTweet.Name.Common + "\n"); err != nil {
 		panic(err)
 	}
+}
+
+func readCountriesFromFile() ([]string, error) {
+	file, err := os.Open("data/TweetedCountries.txt")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
 }
 
 func getRandomCountry(countries []Country) Country {
