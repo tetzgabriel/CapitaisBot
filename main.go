@@ -81,6 +81,17 @@ func main() {
 	countryToTweet := getRandomCountry(countries)
 	clearRequestData(res)
 	tweet(client, &countryToTweet)
+
+	f, fileErr := os.OpenFile("data/TweetedCountries.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if fileErr != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	if _, err = f.WriteString("|" + countryToTweet.Name.Common); err != nil {
+		panic(err)
+	}
 }
 
 func getRandomCountry(countries []Country) Country {
@@ -152,4 +163,10 @@ func getCountries(countryclient http.Client, req *http.Request) *http.Response {
 		log.Fatal(getErr)
 	}
 	return res
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
