@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 )
@@ -27,6 +28,10 @@ type Country struct {
 		Common string `json:"common"`
 	} `json:"name"`
 	Capital []string `json:"capital"`
+}
+
+func main() {
+	lambda.Start(executeBot)
 }
 
 func getClient(creds *Credentials) (*twitter.Client, error) {
@@ -48,10 +53,6 @@ func getClient(creds *Credentials) (*twitter.Client, error) {
 
 	log.Printf("User's ACCOUNT: %s\n", user.Name)
 	return client, nil
-}
-
-func main() {
-	executeBot()
 }
 
 func executeBot() {
