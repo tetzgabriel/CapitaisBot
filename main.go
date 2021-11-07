@@ -51,6 +51,10 @@ func getClient(creds *Credentials) (*twitter.Client, error) {
 }
 
 func main() {
+	executeBot()
+}
+
+func executeBot() {
 	log.Printf("Starting CapitaisBot...")
 
 	log.Printf("Getting Credentials from environment...")
@@ -98,9 +102,6 @@ func main() {
 	tweet(client, &countryToTweet)
 
 	writeCountryNameInFile(err, countryToTweet)
-	fileCountries, _ := readCountriesFromFile()
-
-	log.Printf(fileCountries[1])
 }
 
 func stringInSlice(a string, list []Country) bool {
@@ -209,10 +210,4 @@ func getCountries(countryclient http.Client, req *http.Request) *http.Response {
 		log.Fatal(getErr)
 	}
 	return res
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
 }
